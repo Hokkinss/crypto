@@ -1,5 +1,6 @@
 import requests
 import time
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Глобально храним пары с MEXC
@@ -7,6 +8,19 @@ mexc_symbols = {}
 
 # 0 = без сортировки, 1 = по разнице цен, 2 = по разнице фандинга
 sort_mode = 1
+
+def input_thread():
+    global sort_mode
+    while True:
+        try:
+            user_input = input("Введите режим сортировки (0 = без сортировки, 1 = по цене, 2 = по фандингу): ")
+            if user_input.strip() in {"0", "1", "2"}:
+                sort_mode = int(user_input.strip())
+                print(f"✅ Режим сортировки изменен на {sort_mode}")
+            else:
+                print("❌ Неверный ввод. Введите 0, 1 или 2.")
+        except Exception as e:
+            print("Ошибка ввода:", e)
 
 def get_bitget_futures():
     url = "https://api.bitget.com/api/v2/mix/market/tickers"
@@ -151,5 +165,6 @@ def show_data_fast():
 
         time.sleep(10)
 
-# Запуск
-show_data_fast()
+if __name__ == "__main__":
+    threading.Thread(target=input_thread, daemon=True).start()
+    show_data_fast()
